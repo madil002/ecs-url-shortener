@@ -1,17 +1,21 @@
-### Example Dockerfile - i don't want to see copy and paste of this pls. Make your own and make sure it works. Make sure it's light, secure and instructions to run are there. 
+## Build Stage
+FROM python:3.11-slim AS build
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+COPY . .
 
-# FROM python:3.12-slim AS build
-# WORKDIR /w
-# COPY requirements.txt .
-# RUN pip install --prefix=/out -r requirements.txt
-# COPY src/ ./src
+## Runtime Stage
+FROM gcr.io/distroless/python3-debian12
+WORKDIR /app
 
-# FROM gcr.io/distroless/python3-debian12
-# ENV PYTHONPATH=/app \
-#     TABLE_NAME=changeme
-# WORKDIR /app
-# COPY --from=build /out /usr/local
-# COPY --from=build /w/src /app
-# USER 65532:65532
-# EXPOSE 8080
-# CMD ["-m", "uvicorn", "main:app", "--host=0.0.0.0", "--port=8080"]
+## Distroless inherits Debian’s configuration, so its Python does not automatically search site-packages
+ENV PYTHONPATH=/usr/local/lib/python3.11/site-packages
+COPY --from=build /install /usr/local
+COPY --from=build /app /app
+
+## Special non-root user contianed in distroless and Google container images
+USER 65532:65532
+
+EXPOSE 8080
+CMD ["-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
