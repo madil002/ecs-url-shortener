@@ -19,8 +19,16 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GitHubActions-ECR-Push
-          aws-region: eu-west-2
+          aws-region: ${{ vars.AWS_REGION }}
 
-      - name: test
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and tag the image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ vars.ECR_REPOSITORY }}
         run: |
-          aws sts get-caller-identity
+          sha=$(git rev-parse --short HEAD)
+          docker build -t $REGISTRY/$REPOSITORY:$sha ./app
