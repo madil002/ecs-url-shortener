@@ -1,14 +1,14 @@
-name: Docker build and push
+name: Docker build, test & push
 
 on:
   workflow_dispatch:
 
 permissions:
-  # Does not modify or write to any resources, only allows workflow to request (fetch) & use (set) OIDC token
-  id-token: write
+  id-token: write   # Does not modify or write to any resources, only allows workflow to request (fetch) & use (set) OIDC token
+  security-events: write
 
 jobs:
-  build:
+  build-test-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,10 +25,30 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and tag the image
+      - name: Build the image
+        id: build
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPOSITORY }}
         run: |
           sha=$(git rev-parse --short HEAD)
-          docker build -t $REGISTRY/$REPOSITORY:$sha ./app
+          primary_tag="$REGISTRY/$REPOSITORY:$sha"
+          docker build -t $primary_tag ./app
+          echo "primary_tag=$primary_tag" >> $GITHUB_OUTPUT
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.build.outputs.primary_tag }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+          wait-for-processing: true
+
+      - name: Push to Amazon ECR
+        run: docker push ${{ steps.build.outputs.primary_tag }}
