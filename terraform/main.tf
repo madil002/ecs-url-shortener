@@ -32,7 +32,6 @@ resource "aws_subnet" "all" {
   tags              = { Name = each.key }
 }
 
-
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   route {
