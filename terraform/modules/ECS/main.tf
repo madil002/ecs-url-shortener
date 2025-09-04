@@ -29,7 +29,7 @@ resource "aws_ecs_service" "url_app" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = module.VPC.private_subnets
+    subnets          = var.private_subnets
     security_groups  = [aws_security_group.ecs_task_eni.id]
     assign_public_ip = false
   }
@@ -93,15 +93,14 @@ resource "aws_iam_role_policy" "ecs_task_ddb" {
 
 resource "aws_security_group" "ecs_task_eni" {
   name        = "ecs-task-eni"
-  vpc_id      = module.VPC.vpc_id
+  vpc_id      = var.vpc_id
   description = "SG for ECS service tasks ENI"
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    # security_groups = LB SG here
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
+    # security_groups = var.ecs_task_ingress_sg_ids
   }
 
   egress {
