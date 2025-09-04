@@ -107,7 +107,7 @@ resource "aws_iam_role_policy" "ecs_task_ddb" {
         "dynamodb:PutItem",
         "dynamodb:GetItem",
       ]
-      Resource = "arn:aws:dynamodb:eu-west-2:${var.aws_account_id}:table/test-table"
+      Resource = "arn:aws:dynamodb:eu-west-2:${var.aws_account_id}:table/${var.ddb_table_name}"
     }
   })
 }

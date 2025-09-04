@@ -3,7 +3,7 @@ resource "aws_lb" "main" {
   internal                   = false
   load_balancer_type         = "application"
   security_groups            = [aws_security_group.alb_sg.id]
-  subnets                    = module.VPC.public_subnets
+  subnets                    = var.public_subnets
   enable_deletion_protection = false
 }
 
@@ -12,7 +12,7 @@ resource "aws_lb_target_group" "main" {
   port        = 8080
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = module.VPC.vpc_id
+  vpc_id      = var.vpc_id
 
   health_check {
     enabled             = true
@@ -40,7 +40,7 @@ resource "aws_lb_listener" "http" {
 
 resource "aws_security_group" "alb_sg" {
   name        = "alb"
-  vpc_id      = module.VPC.vpc_id
+  vpc_id      = var.vpc_id
   description = "SG for ALB"
 
   ingress {
