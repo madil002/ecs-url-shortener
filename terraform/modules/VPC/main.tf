@@ -41,9 +41,10 @@ resource "aws_route_table_association" "all" {
   route_table_id = each.value.type == "public" ? aws_route_table.public.id : aws_route_table.private.id
 }
 
-resource "aws_vpc_endpoint" "ecr_api" {
+resource "aws_vpc_endpoint" "interface" {
+  for_each          = var.endpoints.Interface
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.eu-west-2.ecr.api"
+  service_name      = each.value
   vpc_endpoint_type = "Interface"
 
   subnet_ids         = [for key, subnet in aws_subnet.all : subnet.id if var.subnets[key].type == "private"]
@@ -52,20 +53,10 @@ resource "aws_vpc_endpoint" "ecr_api" {
   private_dns_enabled = true
 }
 
-resource "aws_vpc_endpoint" "ecr_dkr" {
+resource "aws_vpc_endpoint" "gateway" {
+  for_each          = var.endpoints.Gateway
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.eu-west-2.ecr.dkr"
-  vpc_endpoint_type = "Interface"
-
-  subnet_ids         = [for key, subnet in aws_subnet.all : subnet.id if var.subnets[key].type == "private"]
-  security_group_ids = [aws_security_group.endpoints.id]
-
-  private_dns_enabled = true
-}
-
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.eu-west-2.s3"
+  service_name      = each.value
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
 }
