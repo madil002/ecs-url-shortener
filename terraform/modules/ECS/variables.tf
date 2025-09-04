@@ -17,3 +17,19 @@ variable "vpc_id" {
 variable "private_subnets" {
   type = list(string)
 }
+
+variable "ecs_task_ingress_sg_ids" {
+  type = list(string)
+}
+
+variable "target_group_arn" {
+  type = string
+}
+
+variable "container_name" {
+  type = string
+}
+
+variable "container_port" {
+  type = string
+}

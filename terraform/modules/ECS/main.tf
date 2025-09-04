@@ -1,3 +1,18 @@
+resource "aws_dynamodb_table" "main" {
+  name         = var.ddb_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = true
+  }
+}
+
 resource "aws_ecs_cluster" "main" {
   name = "url-shortener"
 }
@@ -32,6 +47,12 @@ resource "aws_ecs_service" "url_app" {
     subnets          = var.private_subnets
     security_groups  = [aws_security_group.ecs_task_eni.id]
     assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = var.container_name
+    container_port   = var.container_port
   }
 }
 
@@ -97,10 +118,10 @@ resource "aws_security_group" "ecs_task_eni" {
   description = "SG for ECS service tasks ENI"
 
   ingress {
-    from_port = 8080
-    to_port   = 8080
-    protocol  = "tcp"
-    # security_groups = var.ecs_task_ingress_sg_ids
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = var.ecs_task_ingress_sg_ids
   }
 
   egress {
