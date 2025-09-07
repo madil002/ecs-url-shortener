@@ -49,6 +49,10 @@ resource "aws_ecs_service" "url_app" {
     assign_public_ip = false
   }
 
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+
   load_balancer {
     target_group_arn = var.target_group_arn
     container_name   = var.container_name

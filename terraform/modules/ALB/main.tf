@@ -7,8 +7,27 @@ resource "aws_lb" "main" {
   enable_deletion_protection = false
 }
 
-resource "aws_lb_target_group" "main" {
-  name        = "ecs-alb-tg"
+resource "aws_lb_target_group" "Blue" {
+  name        = "Blue"
+  port        = 8080
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  health_check {
+    enabled             = true
+    protocol            = "HTTP"
+    path                = "/healthz"
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+    timeout             = 10
+    interval            = 30
+    matcher             = "200-399"
+  }
+}
+
+resource "aws_lb_target_group" "Green" {
+  name        = "Green"
   port        = 8080
   protocol    = "HTTP"
   target_type = "ip"
@@ -33,7 +52,7 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.main.arn
+    target_group_arn = aws_lb_target_group.Blue.arn
   }
 
 }

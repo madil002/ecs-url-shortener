@@ -16,7 +16,7 @@ module "ECS" {
   container_image         = var.container_image
   ddb_table_name          = var.ddb_table_name
   ecs_task_ingress_sg_ids = [module.ALB.alb_sg_id]
-  target_group_arn        = module.ALB.target_group_arn
+  target_group_arn        = module.ALB.target_group_blue_arn
   container_name          = "url-shortener"
   container_port          = "8080"
 }
