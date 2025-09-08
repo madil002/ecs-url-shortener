@@ -22,16 +22,17 @@ module "ECS" {
 }
 
 module "ALB" {
-  source         = "./modules/ALB"
-  public_subnets = module.VPC.public_subnets
-  vpc_id         = module.VPC.vpc_id
+  source          = "./modules/ALB"
+  public_subnets  = module.VPC.public_subnets
+  vpc_id          = module.VPC.vpc_id
+  certificate_arn = module.ACM.certificate_arn
 }
 
 module "CodeDeploy" {
   source                  = "./modules/CodeDeploy"
   ecs_service_name        = module.ECS.ecs_service_name
   ecs_cluster_name        = module.ECS.ecs_cluster_name
-  listener_http_arn       = module.ALB.listener_http_arn
+  listener_https_arn      = module.ALB.listener_https_arn
   target_group_blue_name  = module.ALB.target_group_blue_name
   target_group_green_name = module.ALB.target_group_green_name
 }
@@ -41,4 +42,10 @@ module "Route53" {
   domain_name = "app.madil.co.uk"
   lb_dns_name = module.ALB.lb_dns_name
   lb_zone_id  = module.ALB.lb_zone_id
+}
+
+module "ACM" {
+  source                 = "./modules/ACM"
+  domain_name            = "app.madil.co.uk"
+  route53_domain_zone_id = module.Route53.route53_domain_zone_id
 }

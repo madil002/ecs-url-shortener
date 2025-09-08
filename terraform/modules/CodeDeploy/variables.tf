@@ -6,7 +6,7 @@ variable "ecs_service_name" {
   type = string
 }
 
-variable "listener_http_arn" {
+variable "listener_https_arn" {
   type = string
 }
 

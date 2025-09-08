@@ -30,7 +30,7 @@ resource "aws_codedeploy_deployment_group" "url_shortener" {
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = [var.listener_http_arn]
+        listener_arns = [var.listener_https_arn]
       }
 
       target_group {

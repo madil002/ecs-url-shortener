@@ -26,6 +26,6 @@ output "target_group_green_name" {
   value = aws_lb_target_group.Green.name
 }
 
-output "listener_http_arn" {
-  value = aws_lb_listener.http.arn
+output "listener_https_arn" {
+  value = aws_lb_listener.https.arn
 }
