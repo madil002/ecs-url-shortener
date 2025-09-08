@@ -35,3 +35,10 @@ module "CodeDeploy" {
   target_group_blue_name  = module.ALB.target_group_blue_name
   target_group_green_name = module.ALB.target_group_green_name
 }
+
+module "Route53" {
+  source      = "./modules/Route53"
+  domain_name = "app.madil.co.uk"
+  lb_dns_name = module.ALB.lb_dns_name
+  lb_zone_id  = module.ALB.lb_zone_id
+}
