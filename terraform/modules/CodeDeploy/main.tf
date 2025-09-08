@@ -23,22 +23,22 @@ resource "aws_codedeploy_deployment_group" "url_shortener" {
   service_role_arn       = aws_iam_role.codedeploy.arn
 
   ecs_service {
-    cluster_name = module.ECS.ecs_cluster_name
-    service_name = module.ECS.ecs_service_name
+    cluster_name = var.ecs_cluster_name
+    service_name = var.ecs_service_name
   }
 
   load_balancer_info {
     target_group_pair_info {
       prod_traffic_route {
-        listener_arns = [module.ALB.listener_http_arn]
+        listener_arns = [var.listener_http_arn]
       }
 
       target_group {
-        name = module.ALB.target_group_blue_name
+        name = var.target_group_blue_name
       }
 
       target_group {
-        name = module.ALB.target_group_green_name
+        name = var.target_group_green_name
       }
     }
   }

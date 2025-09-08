@@ -26,3 +26,12 @@ module "ALB" {
   public_subnets = module.VPC.public_subnets
   vpc_id         = module.VPC.vpc_id
 }
+
+module "CodeDeploy" {
+  source                  = "./modules/CodeDeploy"
+  ecs_service_name        = module.ECS.ecs_service_name
+  ecs_cluster_name        = module.ECS.ecs_cluster_name
+  listener_http_arn       = module.ALB.listener_http_arn
+  target_group_blue_name  = module.ALB.target_group_blue_name
+  target_group_green_name = module.ALB.target_group_green_name
+}

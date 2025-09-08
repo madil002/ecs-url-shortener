@@ -58,6 +58,12 @@ resource "aws_ecs_service" "url_app" {
     container_name   = var.container_name
     container_port   = var.container_port
   }
+
+  lifecycle {
+    ignore_changes = [
+      load_balancer
+    ]
+  }
 }
 
 resource "aws_iam_role" "ecs_task_execution" {
