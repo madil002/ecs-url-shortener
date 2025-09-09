@@ -24,7 +24,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4.3.1
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/oidc
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GitHubActions-Terraform
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
@@ -78,3 +78,7 @@ jobs:
         with:
           name: tfplan
           path: ./terraform/tfplan
+
+      - name: Show Workflow Run ID
+        run: |
+          echo "## Workflow Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
