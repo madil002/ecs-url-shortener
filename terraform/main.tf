@@ -13,7 +13,7 @@ module "ECS" {
   vpc_id                  = module.VPC.vpc_id
   private_subnets         = module.VPC.private_subnets
   aws_account_id          = var.aws_account_id
-  container_image         = var.container_image
+  container_image         = "${var.aws_account_id}.dkr.ecr.eu-west-2.amazonaws.com/ecs-url-shortener:ad5bafb"
   ddb_table_name          = var.ddb_table_name
   ecs_task_ingress_sg_ids = [module.ALB.alb_sg_id]
   target_group_arn        = module.ALB.target_group_blue_arn

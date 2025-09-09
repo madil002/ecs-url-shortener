@@ -1,0 +1,60 @@
+  name: Terraform apply or destroy
+
+  on:
+    workflow_dispatch:
+      inputs:
+        action:
+          description: "Choose Terraform action"
+          required: true
+          type: choice
+          options:
+            - Apply
+            - Destroy
+        plan_run_id:
+          description: "Workflow run ID of the plan"
+          required: true
+
+  permissions:
+    id-token: write
+
+  jobs:
+    terraform-apply-destroy:
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ./terraform
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4.3.1
+          with:
+            role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/oidc
+            aws-region: ${{ vars.AWS_REGION }}
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: "1.13.1"
+
+        - name: Initialise Terraform
+          run: terraform init
+
+        - name: Download Terraform Plan
+          uses: actions/download-artifact@v5
+          with:
+            name: tfplan
+            path: ./terraform
+            github-token: ${{ secrets.PAT }}
+            repository: ${{ github.repository }}
+            run-id: ${{ github.event.inputs.plan_run_id }}
+
+        - name: Apply Terraform
+          if: ${{ github.event.inputs.action == 'Apply' }}
+          run: terraform apply -auto-approve tfplan
+
+        - name: Destroy Terraform
+          if: ${{ github.event.inputs.action == 'Destroy' }}
+          run: terraform destroy -auto-approve tfplan
