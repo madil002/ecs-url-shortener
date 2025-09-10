@@ -10,7 +10,7 @@ permissions:
 jobs:
   build-test-push:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,3 +52,35 @@ jobs:
 
       - name: Push to Amazon ECR
         run: docker push ${{ steps.build.outputs.primary_tag }}
+
+      - name: Get latest task definition ARN
+        id: get-task-def
+        run: |
+          export LATEST_ARN=$(aws ecs describe-services \
+            --cluster url-shortener \
+            --services url-shortener-service \
+            --query "services[0].taskDefinition" \
+            --output text)
+          echo "LATEST_ARN=$LATEST_ARN" >> $GITHUB_OUTPUT
+
+      - name: Fetch previous task definition JSON
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ steps.get-task-def.outputs.LATEST_ARN }} \
+            --query "taskDefinition" \
+            --output json | \
+            jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
+            > old-task-def.json
+
+      - name: Replace image in task definition
+        run: |
+          jq --arg img "${{ steps.build.outputs.primary_tag }}" \
+            '.containerDefinitions[0].image = $img' old-task-def.json > new-task-def.json
+
+      - name: Register new ECS task definition revision
+        run: |
+          ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-task-def.json \
+            --query "taskDefinition.taskDefinitionArn" \
+            --output text)
+          echo "ECS task definition arn: $ARN" >> $GITHUB_STEP_SUMMARY
