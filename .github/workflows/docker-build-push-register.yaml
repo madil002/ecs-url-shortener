@@ -69,7 +69,7 @@ jobs:
             --task-definition ${{ steps.get-task-def.outputs.LATEST_ARN }} \
             --query "taskDefinition" \
             --output json | \
-            jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)' \
+            jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' \
             > old-task-def.json
 
       - name: Replace image in task definition
