@@ -1,6 +1,9 @@
 module "IdP" {
-  source         = "./modules/IdP"
-  aws_account_id = var.aws_account_id
+  source                 = "./modules/IdP"
+  aws_account_id         = var.aws_account_id
+  ecs_task_role_arn      = module.ECS.ecs_task_role_arn
+  ecs_execution_role_arn = module.ECS.ecs_execution_role_arn
+
 }
 
 module "VPC" {

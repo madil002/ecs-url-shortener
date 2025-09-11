@@ -4,8 +4,8 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = ["2b18947a6a9fc7764fd8b5fb18a863b0c6dac24f"]
 }
 
-resource "aws_iam_role" "GitHubActions-ECR-Push" {
-  name = "GitHubActions-ECR-Push"
+resource "aws_iam_role" "GitHubActions" {
+  name = "GitHubActions"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -26,8 +26,42 @@ resource "aws_iam_role" "GitHubActions-ECR-Push" {
   })
 }
 
+resource "aws_iam_policy" "GitHubActions_ECS" {
+  name = "GitHubActions-ECS"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:UpdateService",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = [
+          var.ecs_task_role_arn,
+          var.ecs_execution_role_arn
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs" {
+  role       = aws_iam_role.GitHubActions.id
+  policy_arn = aws_iam_policy.GitHubActions_ECS.arn
+}
+
 resource "aws_iam_role_policy_attachment" "ecr" {
-  role       = aws_iam_role.GitHubActions-ECR-Push.id
+  role       = aws_iam_role.GitHubActions.id
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
 }
 
