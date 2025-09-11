@@ -1,0 +1,52 @@
+name: CodeDeploy deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      task-def-arn:
+        description: "Task definition ARN"
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.3.1
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/GitHubActions
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Update appspec with new task definition ARN
+        run: |
+          jq --arg arn "${{ github.event.inputs.task-def-arn }}" \
+            '.Resources[0].TargetService.Properties.TaskDefinition = $arn' appspec.json > updated-appspec.json
+
+      - name: Deploy via CodeDeploy
+        id: deploy
+        run: |
+          CONTENT=$(jq -Rs -c . updated-appspec.json)
+
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name "url-shortener" \
+            --deployment-group-name "BlueGreen" \
+            --revision "{\"revisionType\":\"AppSpecContent\",\"appSpecContent\":{\"content\":$CONTENT}}" \
+            --query "deploymentId" \
+            --output text)
+
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
+
+      - name: Wait for deployment
+        run: |
+          aws deploy wait deployment-successful --deployment-id ${{ steps.deploy.outputs.deployment_id }}
+          echo "Deployment complete"
+
+          echo "## Deployment complete: ${{ steps.deploy.outputs.deployment_id }}"
