@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "Resources": [
+    {
+      "TargetService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "TaskDefinition": "arn:aws:ecs:eu-west-2:418272778807:task-definition/url-shortener",
+          "LoadBalancerInfo": {
+            "ContainerName": "url-shortener",
+            "ContainerPort": 8080
+          }
+        }
+      }
+    }
+  ]
+}

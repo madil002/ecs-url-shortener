@@ -4,4 +4,3 @@ __pycache__
 notes
 terraform.tfvars
 .terraform.lock.hcl
-appspec.json
