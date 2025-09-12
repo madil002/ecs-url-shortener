@@ -49,4 +49,4 @@ jobs:
           aws deploy wait deployment-successful --deployment-id ${{ steps.deploy.outputs.deployment_id }}
           echo "Deployment complete"
 
-          echo "## Deployment complete: ${{ steps.deploy.outputs.deployment_id }}"
+          echo "## Deployment complete: ${{ steps.deploy.outputs.deployment_id }}" >> $GITHUB_STEP_SUMMARY

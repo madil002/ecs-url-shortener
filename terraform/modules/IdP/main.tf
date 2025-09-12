@@ -44,6 +44,16 @@ resource "aws_iam_policy" "GitHubActions_ECS" {
       {
         Effect = "Allow"
         Action = [
+          "codedeploy:CreateDeployment",
+          "codedeploy:GetDeployment",
+          "codedeploy:GetDeploymentConfig",
+          "codedeploy:RegisterApplicationRevision"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "iam:PassRole"
         ]
         Resource = [
