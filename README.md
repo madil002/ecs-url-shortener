@@ -176,3 +176,28 @@ The CodeDeploy workflow `codedeploy-deploy.yaml` automates the release of new EC
 <p align="center">
    <img src="images/codedeploy.png" style="width:800px"/>
  </p>
+
+#
+## 🖼️ Visual Reference
+<p align="center">
+   <img src="images/curl_healthz.png" style="width:400px"/>
+</p>
+<p align="center">
+  <img src="images/curl_shorten.png" style="width:400px"/>
+</p>
+<p align="center">
+  <img src="images/curl_short.png" style="width:400px"/>
+</p>
+<p align="center">
+  <img src="images/endpoints.png" style="width:800px"/>
+</p>
+<p align="center">
+  <img src="images/workflows.png" style="width:800px"/>
+</p>
+<p align="center">
+  <img src="images/sampled_req.png" style="width:800px"/>
+</p>
+<p align="center">
+  <img src="images/deployment.png" style="width:800px"/>
+</p>
+ 
